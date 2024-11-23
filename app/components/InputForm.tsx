@@ -1,5 +1,11 @@
 "use client";
 
+/* ZAZZLE TEMPLATE ID:
+
+https://www.zazzle.com/api/create/at-238052026395297176?rf=238052026395297176&pd=256346466156199953&ed=true&ax=Linkover&t_image1_iid=1366fc79-b353-4951-90e9-c173a9038297
+
+TODO: I need to generate an image url so that I can pass it to zazzle
+*/
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -30,7 +36,7 @@ export default function InputForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bandname: "Enter band name",
+      bandname: "",
     },
   });
 
@@ -49,7 +55,11 @@ export default function InputForm() {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input
+                  className="text-2xl"
+                  placeholder="Enter your band name"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
