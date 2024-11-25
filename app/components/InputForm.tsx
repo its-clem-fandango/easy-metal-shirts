@@ -20,6 +20,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import FontOptions from "./FontOptions";
+import { convertCanvasToBlob, uploadToFileIO } from "@/lib/input-helpers";
+
+import { useState } from "react";
 
 const formSchema = z.object({
   bandname: z
@@ -33,6 +36,7 @@ const formSchema = z.object({
 });
 
 export default function InputForm() {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,9 +45,12 @@ export default function InputForm() {
   });
 
   //TODO: another submit handler for submitting font to API?
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    //generates a preview of the font
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { dataUrl, blob } = await convertCanvasToBlob(values.bandname);
+    setPreviewUrl(dataUrl);
+
+    const fileIoUrl = await uploadToFileIO(blob);
+    console.log("File.io URL: ", fileIoUrl);
   }
 
   return (
@@ -68,6 +75,16 @@ export default function InputForm() {
         <FontOptions />
         <Button type="submit">Generate to Shirt</Button>
       </form>
+      {previewUrl && (
+        <div className="mt-4">
+          <p className="mb-2 text-lg font-semibold">Preview:</p>
+          <img
+            src={previewUrl}
+            alt="Generated Preview"
+            className="border rounded-md"
+          />
+        </div>
+      )}
     </Form>
   );
 }
