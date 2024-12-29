@@ -33,6 +33,7 @@ export const metadata: Metadata = {
     "Easily create t-shirts with the most common fonts used by metal bands",
 };
 
+/* TODO: Preload all fonts */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -40,6 +41,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/SamdanEvil.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body
         className={` ${metalLord.variable} ${samdanEvil.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >

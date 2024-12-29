@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
 import InputForm from "./components/InputForm";
+
 export default function Home() {
   return (
     <main className="flex-col p-4 bg-slate-600">
@@ -8,7 +8,6 @@ export default function Home() {
       </h1>
       <div className="max-w-screen-md w-full mx-auto">
         <InputForm />
-        <Button>Buy your design</Button>
       </div>
     </main>
   );
