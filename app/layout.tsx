@@ -28,13 +28,13 @@ const metalLord = localFont({
 });
 
 const suicidal = localFont({
-  src: "./fonts/suicidal.ttf",
+  src: "./fonts/Suicidal.ttf",
   variable: "--font-suicidal",
   display: "swap",
 });
 
 const slayer = localFont({
-  src: "./fonts/slayer.ttf",
+  src: "./fonts/Slayer.ttf",
   variable: "--font-slayer",
   display: "swap",
 });
