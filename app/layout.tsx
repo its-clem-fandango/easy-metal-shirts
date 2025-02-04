@@ -27,6 +27,18 @@ const metalLord = localFont({
   display: "swap",
 });
 
+const suicidal = localFont({
+  src: "./fonts/suicidal.ttf",
+  variable: "--font-suicidal",
+  display: "swap",
+});
+
+const slayer = localFont({
+  src: "./fonts/slayer.ttf",
+  variable: "--font-slayer",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Easy metal shirt",
   description:
@@ -41,17 +53,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="preload"
-          href="/fonts/SamdanEvil.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
-        />
-      </head>
       <body
-        className={` ${metalLord.variable} ${samdanEvil.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${metalLord.variable} ${samdanEvil.variable} ${suicidal.variable} ${slayer.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>

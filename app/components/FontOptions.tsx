@@ -28,6 +28,18 @@ export default function FontOptions({
           Iron Maiden
         </Label>
       </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="suicidal" id="r4" />
+        <Label className="font-suicidal" htmlFor="r4">
+          Suicidal Tendencies
+        </Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="slayer" id="r5" />
+        <Label className="font-slayer" htmlFor="r5">
+          Slayer
+        </Label>
+      </div>
     </RadioGroup>
   );
 }
