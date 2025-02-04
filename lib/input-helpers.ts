@@ -14,16 +14,39 @@ export async function generateCanvasFromInputText(
   // Clear to transparent background
   canvasContext!.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Font mapping
   const fontMap = {
-    default: "bold 120px Arial",
-    samdan: "120px SamdanEvil",
-    metalLord: "120px MetalLord",
+    default: (size: number) => `bold ${size}px Arial`,
+    samdan: (size: number) => `${size}px SamdanEvil`,
+    metalLord: (size: number) => `${size}px MetalLord`,
+    suicidal: (size: number) => `${size}px Suicidal`,
+    slayer: (size: number) => `${size}px Slayer`,
   };
 
-  // Font & Text Properties
-  canvasContext!.font =
+  // Calculate font size that will fit
+  let fontSize = 120; // Start with original size
+  const maxWidth = canvas.width * 0.9; // Leave some padding
+  const fontGetter =
     fontMap[fontStyle as keyof typeof fontMap] || fontMap.default;
+
+  // Binary search to find the largest font size that fits
+  let minSize = 20;
+  let maxSize = 120;
+
+  while (minSize <= maxSize) {
+    const mid = Math.floor((minSize + maxSize) / 2);
+    canvasContext!.font = fontGetter(mid);
+    const width = canvasContext!.measureText(text).width;
+
+    if (width <= maxWidth) {
+      fontSize = mid;
+      minSize = mid + 1;
+    } else {
+      maxSize = mid - 1;
+    }
+  }
+
+  // Apply the calculated font size
+  canvasContext!.font = fontGetter(fontSize);
   canvasContext!.fillStyle = "white";
   canvasContext!.textAlign = "center";
   canvasContext!.textBaseline = "middle";
@@ -94,10 +117,23 @@ export async function uploadToImgur(blob: Blob): Promise<string> {
   return data.data.link;
 }
 
+/* 
+Zazzle settings:
+Create a product by going to the profile icon --> my stores --> products at the top nav bar --> create a new product
+
+When creating a shirt, make sure you use an image as the template instead of text otherwise params.append with _iid wont work -- it would need to be text instead of iid
+
+You can find the product ID right after you create a product by copying "its address on zazzle.com" and getting the last 18 digits
+You need this id to create a product API but not sure I would ever need this actually
+*/
+
 export function generateZazzleProductUrl(imgurUrl: string): string {
   // Your Zazzle account details
   const associateId = "238052026395297176";
-  const productId = "256346466156199953";
+  const productId = "256363885288653934";
+  // fit 256430318646648746
+
+  //fill 256363885288653934
 
   // Base URL with required parameters
   const baseUrl = `https://www.zazzle.com/api/create/at-${associateId}`;
@@ -109,7 +145,7 @@ export function generateZazzleProductUrl(imgurUrl: string): string {
   params.append("pd", productId);
   params.append("ed", "true");
   params.append("tc", "api_test");
-  params.append("t_image1_iid", imgurUrl);
+  params.append("t_bandshirtblack_iid", imgurUrl);
 
   // Log each parameter
   console.log("Zazzle URL Parameters:");

@@ -12,6 +12,8 @@ module.exports = {
       fontFamily: {
         samdan: ["var(--font-samdan-evil)"],
         metalLord: ["var(--font-metal-lord)"],
+        suicidal: ["var(--font-suicidal)"],
+        slayer: ["var(--font-slayer)"],
       },
       colors: {
         border: "hsl(var(--border))",

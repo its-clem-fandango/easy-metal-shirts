@@ -28,8 +28,8 @@ const formSchema = z.object({
     .min(1, {
       message: "Band name must be at least 1 character long",
     })
-    .max(50, {
-      message: "Band name cannot exceed 50 characters",
+    .max(18, {
+      message: "Band name cannot exceed 18 characters",
     }),
   font: z.string().default("default"),
 });
