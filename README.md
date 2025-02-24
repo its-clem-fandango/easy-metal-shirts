@@ -12,7 +12,7 @@ A web application that generates metal band-style text for t-shirts using variou
 
 1. Clone the repository
 2. Install dependencies (npm install)
-3. create a `.env` file and add 
+3. create a `.env` file and add:
 4. add IMGUR_CLIENT_ID=your_client_id_here
 5. Run the server (npm run dev)
 
