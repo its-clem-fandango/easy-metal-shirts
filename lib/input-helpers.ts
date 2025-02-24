@@ -1,3 +1,8 @@
+let lastUploadTime = 0;
+const UPLOAD_COOLDOWN = 30000; // Increased to 30 seconds cooldown
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 5000; // 5 seconds between retries
+
 export async function generateCanvasFromInputText(
   text: string,
   fontStyle: string = "default"
@@ -15,26 +20,41 @@ export async function generateCanvasFromInputText(
   canvasContext!.clearRect(0, 0, canvas.width, canvas.height);
 
   const fontMap = {
-    default: (size: number) => `bold ${size}px Arial`,
-    samdan: (size: number) => `${size}px SamdanEvil`,
-    metalLord: (size: number) => `${size}px MetalLord`,
-    suicidal: (size: number) => `${size}px Suicidal`,
-    slayer: (size: number) => `${size}px Slayer`,
+    metalLord: {
+      font: (size: number) => `${size}px MetalLord`,
+      maxSize: 120,
+      minSize: 20,
+    },
+    samdan: {
+      font: (size: number) => `${size}px SamdanEvil`,
+      maxSize: 120,
+      minSize: 20,
+    },
+    suicidal: {
+      font: (size: number) => `${size}px Suicidal`,
+      maxSize: 100, // Smaller max size for Suicidal font
+      minSize: 16,
+    },
+    slayer: {
+      font: (size: number) => `${size}px Slayer`,
+      maxSize: 100, // Reduced from 120 to match Suicidal
+      minSize: 16,
+    },
   };
 
   // Calculate font size that will fit
-  let fontSize = 120; // Start with original size
+  const fontConfig =
+    fontMap[fontStyle as keyof typeof fontMap] || fontMap.metalLord;
+  let fontSize = fontConfig.maxSize; // Start with style-specific size
   const maxWidth = canvas.width * 0.9; // Leave some padding
-  const fontGetter =
-    fontMap[fontStyle as keyof typeof fontMap] || fontMap.default;
 
   // Binary search to find the largest font size that fits
-  let minSize = 20;
-  let maxSize = 120;
+  let minSize = fontConfig.minSize;
+  let maxSize = fontConfig.maxSize;
 
   while (minSize <= maxSize) {
     const mid = Math.floor((minSize + maxSize) / 2);
-    canvasContext!.font = fontGetter(mid);
+    canvasContext!.font = fontConfig.font(mid);
     const width = canvasContext!.measureText(text).width;
 
     if (width <= maxWidth) {
@@ -46,7 +66,7 @@ export async function generateCanvasFromInputText(
   }
 
   // Apply the calculated font size
-  canvasContext!.font = fontGetter(fontSize);
+  canvasContext!.font = fontConfig.font(fontSize);
   canvasContext!.fillStyle = "white";
   canvasContext!.textAlign = "center";
   canvasContext!.textBaseline = "middle";
@@ -95,26 +115,71 @@ export async function convertCanvasToBlob(
 }
 
 export async function uploadToImgur(blob: Blob): Promise<string> {
+  // Check if we need to wait before uploading again
+  const now = Date.now();
+  const timeSinceLastUpload = now - lastUploadTime;
+
+  if (timeSinceLastUpload < UPLOAD_COOLDOWN) {
+    const waitTime = UPLOAD_COOLDOWN - timeSinceLastUpload;
+    throw new Error(
+      `Please wait ${Math.ceil(waitTime / 1000)} seconds before trying again`
+    );
+  }
+
   const formData = new FormData();
   formData.append("image", blob);
 
-  const response = await fetch("/api/upload", {
-    method: "POST",
-    body: formData,
-  });
+  let lastError: Error | null = null;
 
-  const data = await response.json();
-  console.log("Upload API response:", data);
+  // Try multiple times with delay between attempts
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      if (attempt > 0) {
+        // Wait before retrying
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+        console.log(`Retry attempt ${attempt + 1}/${MAX_RETRIES}`);
+      }
 
-  if (!response.ok) {
-    throw new Error(`Upload failed: ${data.error || response.statusText}`);
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.status === 429) {
+        lastError = new Error(
+          "Rate limit exceeded. Please wait a moment before trying again."
+        );
+        continue; // Try again after delay
+      }
+
+      const data = await response.json();
+      console.log("Upload API response:", data);
+
+      if (!response.ok) {
+        lastError = new Error(
+          `Upload failed: ${data.error || response.statusText}`
+        );
+        continue;
+      }
+
+      if (!data.success) {
+        lastError = new Error(
+          `Upload failed: ${data.data?.error || "Unknown error"}`
+        );
+        continue;
+      }
+
+      // Success! Update last upload time and return
+      lastUploadTime = now;
+      return data.data.link;
+    } catch (error) {
+      console.error(`Upload error (attempt ${attempt + 1}):`, error);
+      lastError = error as Error;
+    }
   }
 
-  if (!data.success) {
-    throw new Error(`Upload failed: ${data.data?.error || "Unknown error"}`);
-  }
-
-  return data.data.link;
+  // If we get here, all attempts failed
+  throw lastError || new Error("Failed to upload after multiple attempts");
 }
 
 /* 
@@ -131,30 +196,19 @@ export function generateZazzleProductUrl(imgurUrl: string): string {
   // Your Zazzle account details
   const associateId = "238052026395297176";
   const productId = "256363885288653934";
-  // fit 256430318646648746
-
-  //fill 256363885288653934
 
   // Base URL with required parameters
   const baseUrl = `https://www.zazzle.com/api/create/at-${associateId}`;
 
-  // Create URL with parameters in the exact order from documentation
-  const params = new URLSearchParams();
-  params.append("rf", associateId);
-  params.append("ax", "Linkover");
-  params.append("pd", productId);
-  params.append("ed", "true");
-  params.append("tc", "api_test");
-  params.append("t_bandshirtblack_iid", imgurUrl);
+  // Encode the Imgur URL
+  const encodedUrl = encodeURIComponent(imgurUrl);
 
-  // Log each parameter
-  console.log("Zazzle URL Parameters:");
-  params.forEach((value, key) => {
-    console.log(`${key}: ${value}`);
-  });
+  // Construct URL manually to ensure exact format
+  const finalUrl = `${baseUrl}?rf=${associateId}&ax=Linkover&pd=${productId}&ed=true&tc=api_test&t_bandshirtblack_iid=${encodedUrl}`;
 
-  const finalUrl = `${baseUrl}?${params.toString()}`;
   console.log("Full Zazzle URL:", finalUrl);
+  console.log("Original Image URL:", imgurUrl);
+  console.log("Encoded Image URL:", encodedUrl);
 
   return finalUrl;
 }

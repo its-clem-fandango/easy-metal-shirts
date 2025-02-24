@@ -13,30 +13,26 @@ export default function FontOptions({
   return (
     <RadioGroup value={value} onValueChange={onValueChange}>
       <div className="flex items-center space-x-2">
-        <RadioGroupItem value="default" id="r1" />
-        <Label htmlFor="r1">Default</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="samdan" id="r2" />
-        <Label className="font-samdan" htmlFor="r2">
-          Danzig
-        </Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="metalLord" id="r3" />
-        <Label className="font-metalLord" htmlFor="r3">
+        <RadioGroupItem value="metalLord" id="r1" />
+        <Label className="font-metalLord text-2xl" htmlFor="r1">
           Iron Maiden
         </Label>
       </div>
       <div className="flex items-center space-x-2">
-        <RadioGroupItem value="suicidal" id="r4" />
-        <Label className="font-suicidal" htmlFor="r4">
+        <RadioGroupItem value="samdan" id="r2" />
+        <Label className="font-samdan text-2xl" htmlFor="r2">
+          Danzig
+        </Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="suicidal" id="r3" />
+        <Label className="font-suicidal text-2xl" htmlFor="r3">
           Suicidal Tendencies
         </Label>
       </div>
       <div className="flex items-center space-x-2">
-        <RadioGroupItem value="slayer" id="r5" />
-        <Label className="font-slayer" htmlFor="r5">
+        <RadioGroupItem value="slayer" id="r4" />
+        <Label className="font-slayer text-2xl" htmlFor="r4">
           Slayer
         </Label>
       </div>
