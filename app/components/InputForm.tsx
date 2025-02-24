@@ -1,26 +1,16 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
 import FontOptions from "./FontOptions";
 import {
   convertCanvasToBlob,
   generateZazzleProductUrl,
   uploadToImgur,
 } from "@/lib/input-helpers";
-
-import { useState } from "react";
+import Image from "next/image";
 
 const formSchema = z.object({
   bandname: z
@@ -31,112 +21,108 @@ const formSchema = z.object({
     .max(19, {
       message: "Band name cannot exceed 19 characters",
     }),
-  font: z.string().default("default"),
 });
 
 export default function InputForm() {
+  const [bandname, setBandname] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedFont, setSelectedFont] = useState("metalLord");
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      bandname: "",
-      font: "default",
-    },
-  });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setBandname(value);
 
-  async function onPreview(values: z.infer<typeof formSchema>) {
     try {
-      setIsGenerating(true);
-      const { dataUrl } = await convertCanvasToBlob(
-        values.bandname,
-        values.font
-      );
-      setPreviewUrl(dataUrl);
-    } catch (error) {
-      console.error("Error generating preview: ", error);
-    } finally {
-      setIsGenerating(false);
+      formSchema.parse({ bandname: value });
+      setError(null);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setError(err.errors[0].message);
+      }
     }
-  }
+  };
+
+  const handleFontChange = (font: string) => {
+    setSelectedFont(font);
+  };
+
+  useEffect(() => {
+    const updatePreview = async () => {
+      if (!bandname) {
+        setPreviewUrl(null);
+        return;
+      }
+
+      try {
+        const { dataUrl } = await convertCanvasToBlob(bandname, selectedFont);
+        setPreviewUrl(dataUrl);
+      } catch (error) {
+        console.error("Error generating preview", error);
+      }
+    };
+
+    updatePreview();
+  }, [bandname, selectedFont]);
 
   async function onBuyNow() {
-    if (!form.getValues().bandname || !previewUrl) return;
+    if (!previewUrl) return;
 
     try {
       setIsLoading(true);
-      const { blob } = await convertCanvasToBlob(
-        form.getValues().bandname,
-        form.getValues().font
-      );
+      const { blob } = await convertCanvasToBlob(bandname, selectedFont);
       const imgurUrl = await uploadToImgur(blob);
       const zazzleUrl = generateZazzleProductUrl(imgurUrl);
       window.open(zazzleUrl, "_blank");
     } catch (error) {
-      console.error("Error creating product: ", error);
+      console.error("Error generating product", error);
     } finally {
       setIsLoading(false);
     }
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onPreview)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="bandname"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <Input
-                  className="text-2xl"
-                  placeholder="Enter your band name"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+      <div>
+        <Input
+          className="text-2xl"
+          placeholder="Enter your band name"
+          value={bandname}
+          onChange={handleInputChange}
         />
-        <FormField
-          control={form.control}
-          name="font"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <FontOptions
-                  onValueChange={field.onChange}
-                  value={field.value}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <div className="flex gap-4">
-          <Button type="submit" disabled={isGenerating}>
-            {isGenerating ? "Generating..." : "Preview Design"}
-          </Button>
-          <Button
-            type="button"
-            onClick={onBuyNow}
-            disabled={!previewUrl || isLoading}
-          >
-            {isLoading ? "Creating..." : "Buy Now"}
-          </Button>
-        </div>
-      </form>
+        {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      </div>
+
+      <FontOptions onValueChange={handleFontChange} value={selectedFont} />
+
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          onClick={onBuyNow}
+          disabled={!previewUrl || isLoading}
+          className="w-full max-w-md text-lg py-6"
+        >
+          {isLoading ? "Creating..." : "Buy Now"}
+        </Button>
+      </div>
+
       {previewUrl && (
         <div className="mt-4">
           <p className="mb-2 text-lg font-semibold">Preview:</p>
-          <img
-            src={previewUrl}
-            alt="Generated Preview"
-            className="border rounded-md"
-          />
+          <div className="bg-black p-4 rounded-md">
+            <Image
+              src={previewUrl}
+              alt="Generated Preview"
+              width={800}
+              height={400}
+              className="border rounded-md w-full h-auto"
+              priority
+              unoptimized
+            />
+          </div>
         </div>
       )}
-    </Form>
+    </form>
   );
 }

@@ -1,5 +1,4 @@
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 interface FontOptionsProps {
   onValueChange: (value: string) => void;
@@ -11,31 +10,35 @@ export default function FontOptions({
   value,
 }: FontOptionsProps) {
   return (
-    <RadioGroup value={value} onValueChange={onValueChange}>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="metalLord" id="r1" />
-        <Label className="font-metalLord text-2xl" htmlFor="r1">
-          Iron Maiden
-        </Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="samdan" id="r2" />
-        <Label className="font-samdan text-2xl" htmlFor="r2">
-          Danzig
-        </Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="suicidal" id="r3" />
-        <Label className="font-suicidal text-2xl" htmlFor="r3">
-          Suicidal Tendencies
-        </Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <RadioGroupItem value="slayer" id="r4" />
-        <Label className="font-slayer text-2xl" htmlFor="r4">
-          Slayer
-        </Label>
-      </div>
-    </RadioGroup>
+    <div className="grid grid-cols-2 gap-4">
+      <Button
+        variant={value === "metalLord" ? "default" : "secondary"}
+        onClick={() => onValueChange("metalLord")}
+        className="h-16"
+      >
+        <span className="font-metalLord text-2xl">Iron Maiden</span>
+      </Button>
+      <Button
+        variant={value === "samdan" ? "default" : "secondary"}
+        onClick={() => onValueChange("samdan")}
+        className="h-16"
+      >
+        <span className="font-samdan text-2xl">Danzig</span>
+      </Button>
+      <Button
+        variant={value === "suicidal" ? "default" : "secondary"}
+        onClick={() => onValueChange("suicidal")}
+        className="h-16"
+      >
+        <span className="font-suicidal text-2xl">Suicidal Tendencies</span>
+      </Button>
+      <Button
+        variant={value === "slayer" ? "default" : "secondary"}
+        onClick={() => onValueChange("slayer")}
+        className="h-16"
+      >
+        <span className="font-slayer text-2xl">Slayer</span>
+      </Button>
+    </div>
   );
 }
