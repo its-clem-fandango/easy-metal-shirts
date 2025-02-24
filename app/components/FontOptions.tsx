@@ -14,30 +14,32 @@ export default function FontOptions({
       <Button
         variant={value === "metalLord" ? "default" : "secondary"}
         onClick={() => onValueChange("metalLord")}
-        className="h-16"
+        className="min-h-16 py-4"
       >
-        <span className="font-metalLord text-2xl">Iron Maiden</span>
+        <span className="font-metalLord text-xl sm:text-2xl">Iron Maiden</span>
       </Button>
       <Button
         variant={value === "samdan" ? "default" : "secondary"}
         onClick={() => onValueChange("samdan")}
-        className="h-16"
+        className="min-h-16 py-4"
       >
-        <span className="font-samdan text-2xl">Danzig</span>
+        <span className="font-samdan text-xl sm:text-2xl">Danzig</span>
       </Button>
       <Button
         variant={value === "suicidal" ? "default" : "secondary"}
         onClick={() => onValueChange("suicidal")}
-        className="h-16"
+        className="min-h-16 py-4"
       >
-        <span className="font-suicidal text-2xl">Suicidal Tendencies</span>
+        <span className="font-suicidal text-sm sm:text-lg md:text-xl lg:text-2xl break-words">
+          Suicidal Tendencies
+        </span>
       </Button>
       <Button
         variant={value === "slayer" ? "default" : "secondary"}
         onClick={() => onValueChange("slayer")}
-        className="h-16"
+        className="min-h-16 py-4"
       >
-        <span className="font-slayer text-2xl">Slayer</span>
+        <span className="font-slayer text-xl sm:text-2xl">Slayer</span>
       </Button>
     </div>
   );
