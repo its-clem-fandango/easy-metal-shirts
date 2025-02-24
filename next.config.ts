@@ -5,6 +5,19 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
     unoptimized: true,
   },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Permissions-Policy",
+            value: "browsing-topics=()",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -74,9 +74,23 @@ export default function InputForm() {
       const { blob } = await convertCanvasToBlob(bandname, selectedFont);
       const imgurUrl = await uploadToImgur(blob);
       const zazzleUrl = generateZazzleProductUrl(imgurUrl);
-      window.open(zazzleUrl, "_blank");
+
+      // Try window.open first
+      const newWindow = window.open(zazzleUrl, "_blank");
+
+      // If window.open failed or was blocked, fallback to location.href
+      if (
+        !newWindow ||
+        newWindow.closed ||
+        typeof newWindow.closed === "undefined"
+      ) {
+        window.location.href = zazzleUrl;
+      }
     } catch (error) {
       console.error("Error generating product", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to generate product"
+      );
     } finally {
       setIsLoading(false);
     }
