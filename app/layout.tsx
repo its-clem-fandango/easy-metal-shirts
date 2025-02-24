@@ -40,9 +40,19 @@ const slayer = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Easy metal shirt",
+  title: "Easy Band Shirt Designer | Create Custom Metal Band T-Shirts",
   description:
-    "Easily create t-shirts with the most common fonts used by metal bands",
+    "Design custom metal band t-shirts with authentic metal fonts. Free online tool for creating professional-looking band merch and metal typography designs.",
+  keywords:
+    "metal fonts, band shirts, metal t-shirts, metal typography, band merch designer",
+  openGraph: {
+    title: "Easy Metal Shirt Designer | Create Custom Metal Band T-Shirts",
+    description:
+      "Design custom metal band t-shirts with authentic metal fonts. Free online tool for creating professional-looking band merch and metal typography designs.",
+    type: "website",
+    locale: "en_US",
+    siteName: "Easy Metal Shirt",
+  },
 };
 
 /* TODO: Preload all fonts */
